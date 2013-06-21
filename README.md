@@ -38,7 +38,7 @@ Produces some random matrix in the integers mod 7:
 And now some simple stuff:
 --------------------------
 
-A = Matrix(rows,cols)
+    A = Matrix(rows,cols)
 
 Create a simple, empty matrix.
 
