@@ -26,7 +26,7 @@ And,
 
 Produces some random matrix in the integers mod 7:
 
-    6 3	2	6	5	0	3	5	6
+    6   3	2	6	5	0	3	5	6
     4	3	3	5	1	5	0	3	5
     6	1	4	3	3	5	0	1	1
     0	6	3	1	5	1	3	6	2
