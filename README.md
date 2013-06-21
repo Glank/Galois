@@ -38,6 +38,27 @@ Produces some random matrix in the integers mod 7:
 And now some simple stuff:
 --------------------------
 
+You can create elements in a finite field like this,
+
+    a = FFE(8, 13)
+    b = FFE(12, 13)
+
+And then do simple operations with them:
+
+    print a+b
+    print a-b
+    print a*b
+    print b/a
+
+prints:
+
+    7
+    9
+    5
+    8
+    
+You can also make matricies. By default they are in the real domain:
+
     A = Matrix(rows,cols)
 
 Create a simple, empty matrix.
