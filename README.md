@@ -2,12 +2,13 @@ CodingTheory
 ============
 
 Coding Theory math utilities in python.
-Will help to do any coding theory homework.
+It can help to do coding theory homework, but I wouldn't trust it for any real-world applications.
 
 For examples of usage, please see test.py
 
 
 Some impressive stuff (not really):
+-----------------------------------
 
     print "(Z_2)^3:"
     print Zmod(2)**3
@@ -35,10 +36,16 @@ Produces some random matrix in the integers mod 7:
 
 
 And now some simple stuff:
+--------------------------
 
     A.transpose()
 
 Transposes a matrix. (A^T)
+
+    A.set(row,col,value)
+    print A.get(row,col)
+
+Getting and setting values is rather obvious.
 
     A*B
     A+B
