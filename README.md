@@ -42,10 +42,6 @@ And now some simple stuff:
 
 Create a simple, empty matrix.
 
-    A.transpose()
-
-Transposes a matrix. (A^T)
-
     A.set(row,col,value)
     print A.get(row,col)
 
@@ -55,6 +51,10 @@ Getting and setting values is rather obvious.
     A+B
 
 These operators work with matricies as well (provided that they are of the right dimensions of course)
+
+    A.transpose()
+
+Transposes a matrix. (A^T)
 
     A.get_reduced_echelon()
 
