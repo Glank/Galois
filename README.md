@@ -47,20 +47,20 @@ Create a simple, empty matrix.
 
 Getting and setting values is rather obvious.
 
-    A*B
-    A+B
+    C = A*B
+    C = A+B
 
 These operators work with matricies as well (provided that they are of the right dimensions of course)
 
-    A.transpose()
+    A = A.transpose()
 
 Transposes a matrix. (A^T)
 
-    A.get_reduced_echelon()
+    A = A.get_reduced_echelon()
 
 Returns the row reduced echelon form of a matrix A.
 
-    A.to_Zmod(11)
+    A = A.to_Zmod(11)
 
 Gets a matrix in the finite field of integers mod 11.
 
