@@ -60,28 +60,27 @@ You can also make matricies. By default they are in the real domain:
 
     A = Matrix(rows,cols)
 
-Create a simple, empty matrix.
+Creates a simple, empty matrix. Getting and setting values is rather obvious:
 
     A.set(row,col,value)
     print A.get(row,col)
 
-Getting and setting values is rather obvious.
+These operators work with matricies as well (provided that they are of the right dimensions of course):
 
     C = A*B
     C = A+B
+    C = A-B
 
-These operators work with matricies as well (provided that they are of the right dimensions of course)
+Transposes a matrix. (A^T):
 
     A = A.transpose()
 
-Transposes a matrix. (A^T)
+Row reduce to reduced echelon form of a matrix A:
 
     A = A.get_reduced_echelon()
 
-Returns the row reduced echelon form of a matrix A.
+Move the matrix into the finite field of integers mod 11.
 
     A = A.to_Zmod(11)
 
-Gets a matrix in the finite field of integers mod 11.
-
-More to come.
+There's more to come.
