@@ -2,6 +2,21 @@ import math
 import operator
 import copy
 
+def to_base(number, base):
+	assert number>=0
+	assert base>1
+	ret = []
+	i = 0
+	while number > 0:
+		digit = number%base
+		ret = [FFE(digit, base)]+ret
+		number/=base
+	if len(ret) == 0:
+		ret = [FFE(0, base)]
+	if base==2:
+		ret = [Bit(i.i) for i in ret]
+	return ret
+
 class FFE:
 	"""An element of a finite field."""
 	
@@ -103,7 +118,7 @@ class Bit(FFE):
 		return Bit((self.i+1)%2)
 
 	def __invert__(self):
-		return __not__(self)
+		return self.__not__()
 
 	def __repr__(self):
 		return "Bit(%d)"%self.i
@@ -120,10 +135,32 @@ class Matrix:
 			self.data = []
 			for r in xrange(rows):
 				if hasattr(fill,'__call__'):
-					row = [fill() for c in xrange(cols)]
+					row = [fill(r,c) for c in xrange(cols)]
 				else:
 					row = [fill for c in xrange(cols)]
 				self.data.append(row)
+
+	@staticmethod
+	def get_identity(size):
+		data = []
+		for r in xrange(size):
+			data.append([])
+			for c in xrange(size):
+				data[r].append(1 if r == c else 0)
+		return Matrix(data=data)
+	
+	def to_Zmod(self, base):
+		if base == 2:
+			return Matrix(self.rows, self.cols, fill=lambda r,c:Bit(self.get(r,c)%2))
+		return Matrix(self.rows, self.cols, fill=lambda r,c:FFE(self.get(r,c)%base,base))
+
+	def join_with(self, other):
+		assert self.rows == other.rows
+		def get(r,c):
+			if c<self.cols:
+				return self.get(r,c)
+			return other.get(r,c-self.cols)
+		return Matrix(self.rows,self.cols+other.cols,fill=get)
 
 	def get(self,r,c):
 		return self.data[r][c]
@@ -133,6 +170,9 @@ class Matrix:
 
 	def get_row(self,r):
 		return self.data[r]
+	
+	def set_row(self,r,row):
+		self[r] = row
 
 	def __add__(self, other):
 		assert self.rows == other.rows

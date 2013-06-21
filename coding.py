@@ -11,15 +11,14 @@ class TestChannel:
 	def transmit(self, bits):
 		buf = []
 		for bit in bits:
-			assert isinstance(obj,Bit)
+			assert isinstance(bit,Bit)
 			if random.random()<self.error_rate:
 				bit = ~bit
 			buf.append(bit)
 		return buf
 
 class Code:
-	def __init__(self, words, block_size):
-		self.words = words
+	def __init__(self, block_size):
 		self.block_size = block_size
 
 	def encode(self, words):
@@ -29,19 +28,51 @@ class Code:
 		raise NotImplementedError("Please Implement this method")
 
 	def get_rand_word(self):
-		return random.choice(words)
+		raise NotImplementedError("Please Implement this method")
 
 class LinearBlockCode(Code):
 	def __init__(self, G):
 		self.G = G
-		words = (i for i in xrange(G.get(0,0).p**G.rows))
-		Code.__init__(self,words,G.rows)
+		G = G.get_reduced_echelon()
+		P = Matrix(G.rows, G.cols-G.rows,fill=lambda r,c:G.get(r,c+G.rows))
+		I = Matrix.get_identity(P.cols).to_Zmod(2)
+		self.H = P.transpose().join_with(I)	
+		self.base = G.get(0,0).p
+		self.words = self.base**G.rows
+		Code.__init__(self,1)
+		self.code_list = [self.encode([w]) for w in xrange(self.words)]
 
-	def __encode__(self, words):
+	def encode(self, words):
+		bits = []
 		for word in words:
-			pass ##TODO
+			w = to_base(word, self.base)
+			w = [FFE(0,self.base) for i in xrange(self.G.rows-len(w))]+w
+			w = Matrix(data=[w])
+			c = w*self.G
+			bits = bits+c.get_row(0)
+		bits = [Bit(i.i) for i in bits]
+		return bits
 
-def approximate_rates(code, channel=TestChannel(0), trials=10000):
+	def decode(self, bits):
+		def get_word(w):
+			return [bits[w*self.G.rows+i] for i in xrange(self.G.cols)]
+		code_words = [get_word(w) for w in xrange(len(bits)/self.G.cols)]
+		words = []
+		for code in code_words:
+			min_dist = float("inf")
+			min_index = 0
+			for i, w in enumerate(self.code_list):
+				dist = hamming_distance(w,code)
+				if dist < min_dist:
+					min_dist = dist
+					min_index = i
+			words.append(min_index)	
+		return words
+
+	def get_random_word(self):
+		return random.randint(0,self.words-1)
+
+def run_test(code, channel=TestChannel(0), trials=10000):
 	errors = 0.0
 	words_sent = 0.0
 	bits_sent = 0.0
@@ -55,12 +86,12 @@ def approximate_rates(code, channel=TestChannel(0), trials=10000):
 				errors+= 1
 		words_sent+= len(w_in)
 		bits_sent+= len(b_in)
-	rates = {
-		"encoding":words_sent/bits_sent,
-		"transmission":(words_sent-errors)/bits_sent,
-		"error":errors/words_sent,
+	results = {
+		"total errors":errors,
+		"words sent":words_sent,
+		"bits sent":bits_sent,
 	}
-	return rates
+	return results
 
 def hamming_distance(s1, s2):
 	assert len(s1) == len(s2)
