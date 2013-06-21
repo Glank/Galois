@@ -10,7 +10,6 @@ For examples of usage, please see test.py
 Some impressive stuff (not really):
 -----------------------------------
 
-    print "(Z_2)^3:"
     print Zmod(2)**3
 
 Prints the size 3 vector space of the finite field of two elements. (All binary words of length 3):
