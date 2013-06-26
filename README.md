@@ -4,8 +4,13 @@ CodingTheory
 Coding Theory math utilities in python.
 It can help to do coding theory homework, but I wouldn't trust it for any real-world applications.
 
-For examples of usage, please see test.py
+For examples of simple usage, please see <a href="https://github.com/Glank/CodingTheory/blob/master/test.py">test.py</a>.
 
+For examples of some real world usage (actual code I'm writing for my math class) see 
+<a href="https://github.com/Glank/CodingTheory/blob/master/HW.py">HW.py</a> who's output you can find
+<a href="https://github.com/Glank/CodingTheory/blob/master/homework_print.txt">here</a>.
+
+There are many more advanced examples in the two example files than are shown below.
 
 Some impressive stuff (not really):
 -----------------------------------
