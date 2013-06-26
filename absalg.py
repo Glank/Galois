@@ -248,8 +248,19 @@ class Matrix:
 		return not self == other
 
 	def __str__(self):
-		rows = ["\t".join([str(value) for value in row]) for row in self.data]
+		def join_row(row):
+			return "\t".join([str(value) for value in row])
+		rows = [join_row(row) for row in self.data]
 		return "\n".join(rows)
+
+	def to_latex(self):
+		def join_row(row):
+			return " & ".join([str(value) for value in row])
+		rows = [join_row(row) for row in self.data]
+		ret = "\\\\\n".join(rows)
+		ret = "\\left[\\begin{tabular}{"+"c"*self.cols+"}\n"+ret
+		ret = ret+"\\end{tabular}\\right]"
+		return ret
 
 	def transpose(self):
 		data = []
