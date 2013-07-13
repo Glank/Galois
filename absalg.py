@@ -17,12 +17,166 @@ def to_base(number, base):
 		ret = [Bit(i.i) for i in ret]
 	return ret
 
+_primes = [2,3]
+def is_prime(n):
+	i = 0
+	sqrt = math.sqrt(n)
+	while get_prime(i)<=sqrt:
+		if n%get_prime(i)==0:
+			return False
+		i+=1
+	return True
+def next_prime(p):
+	i = p+1
+	while not is_prime(i):
+		i+=1
+	return i
+def get_prime(n):
+	global _primes
+	if n < len(_primes):
+		return _primes[n]
+	while n >= len(_primes):
+		_primes.append(next_prime(_primes[-1]))
+	return _primes[n]
+def factor(n):
+	i = 0
+	factors = []
+	while n!=1:
+		while n%get_prime(i)==0:
+			factors.append(get_prime(i))
+			n/=get_prime(i)
+		i+=1
+	return factors
+
+def addition(a,b):
+	return a+b
+def multiplication(a,b):
+	return a*b
+
+def is_group(elems, addition=addition):
+	"""A proof by contradiction that the set 'elems' is not a Group
+	under 'addition'."""
+	#To prove by contradiction that there is an additive identity,
+	#we will assume that the opposite is true. 
+	zero = None
+	#The following is a proof by cases that an additive identity exists
+	#and that addition is a closure.
+	#Let 'a' be an element in 'elems' and
+	for a in elems:
+		#assume that a = 0.
+		isZero = True
+		#Let 'b' be an element in 'elems'.
+		for b in elems:
+			#If 'a+b=0' then
+			if not addition(a,b) in elems:
+				#'elems' is not a group under addition.
+				return False
+			#For all 'c' in the set 'elems',
+			for c in elems:
+				#Let...
+				#sum1 = (a+b)+c
+				#sum2 = a+(b+c)
+				sum1 = addition(addition(a,b),c)
+				sum2 = addition(a,addition(b,c))
+				#Addition is not associative if 'sum1' does not
+				#equal 'sum2'
+				if sum1 != sum2:
+					#so 'elems' is not a group under addition.
+					return False
+			#If a+b does not equal b then...
+			if addition(a,b)!=b or addition(b,a)!=b:
+				#a is not equal to zero
+				isZero = False
+		#
+		if isZero:
+			zero = a
+	#has zero element
+	if zero is None:
+		return False
+	#has subtraction
+	for a in elems:
+		hasInverse = False
+		for b in elems:
+			if addition(a,b)==zero and addition(b,a)==zero:
+				hasInverse = True
+		if not hasInverse:
+			return False
+	#passed every test
+	return True
+
+def is_ring(elems, addition=addition, multiplication=multiplication):
+	#is also a group under addition
+	if not is_group(elems, addition):
+		return False, "Is Not group"
+	for a in elems:
+		for b in elems:
+			#addition is communicative
+			if addition(a,b)!=addition(b,a):
+				return False, "Addition is not communicative"
+			#multiplication is closed
+			if not multiplication(a,b) in elems:
+				return False, "Multiplication isn't a closure."
+			for c in elems:
+				#multiplication is associative
+				prod1 = multiplication(multiplication(a,b),c)
+				prod2 = multiplication(a,multiplication(b,c))
+				if prod1!=prod2:
+					return False, "Multiplication is not associative"
+				#distribution works
+				result1 = multiplication(a,addition(b,c))
+				left = multiplication(a,b)
+				right = multiplication(a,c)
+				result2 = addition(left,right)
+				if result1!=result2:
+					return False, "Distribution doesn't work"
+				result1 = multiplication(addition(b,c),a)
+				left = multiplication(b,a)
+				right = multiplication(c,a)
+				result2 = addition(left,right)
+				if result1!=result2:
+					return False, "Distribution doesn't work"
+	return True
+
+def is_field(elems, addition=addition, multiplication=multiplication):
+	#is also a ring
+	if not is_ring(elems, addition, multiplication):
+		return False, "Is Not Ring"
+	# check that multiplication is communative
+	# and get zero
+	zero = None
+	for a in elems:
+		isZero = True
+		for b in elems:
+			if multiplication(a,b)!=multiplication(b,a):
+				return False, "Multiplication is not communative"
+			if addition(a,b)!=b:
+				isZero = False
+			if addition(b,a)!=b:
+				isZero = False
+		if isZero:
+			zero = a
+	# check that there is a multiplicative identity
+	one = None
+	for a in elems:
+		#by cases
+		isOne = True
+		for b in elems:
+			if b is not zero:
+				if multiplication(a,b)!=b or multiplication(b,a)!=b:
+					isOne = False
+		if isOne:
+			one = a
+	if one is None:
+		return False, "No multiplicative identity"
+	#the element is a field
+	return True
+		
 class FFE:
 	"""An element of a finite field."""
 	
 	def __init__(self, i, p):
-		self.i = int(i)
-		self.p = int(p)
+		self.i = i
+		self.p = p
 
 	def __add__(self, other):
 		if isinstance(other,FFE):
@@ -53,12 +207,14 @@ class FFE:
 			return other.__rdiv__(self)
 
 	def mul_inv(self):
-		assert self.i!=0
+		zero = self.i-self.i
+		assert self.i!=zero
+		one = self.i/self.i
 		u = self.i
 		v = self.p
-		x1 = 1
-		x2 = 0
-		while u!=1:
+		x1 = one
+		x2 = zero
+		while u!=one:
 			q = v/u
 			r = v-q*u
 			x = x2-q*x1
@@ -83,10 +239,10 @@ class FFE:
 		return self.i != other.i
 
 	def __str__(self):
-		return "%d"%self.i
+		return "%s"%str(self.i)
 
 	def __repr__(self):
-		return "FFE(%d,%d)"%(self.i,self.p)
+		return "FFE(%s,%s)"%(str(self.i),str(self.p))
 
 	def __nonzero__(self):
 		return self.i!=0
@@ -123,6 +279,122 @@ class Bit(FFE):
 	def __repr__(self):
 		return "Bit(%d)"%self.i
 
+class Polynomial:
+	def __init__(self, coefficients):
+		assert len(coefficients)>0
+		self.coefficients = coefficients
+		self._trim_()
+
+	def _zero_(self):
+		return self.coefficients[0]-self.coefficients[0]
+
+	def _trim_(self):
+		zero = self._zero_()
+		while self.deg() > 0 and self.coefficients[-1]==zero:
+			self.coefficients.pop()
+		
+	def to_Zmod(self, mod):
+		coefficients = self.coefficients
+		if mod != 2:
+			return Polynomial([FFE(c%mod,mod) for c in coefficients])
+		return Polynomial([Bit(c%2) for c in coefficients])
+
+	def deg(self):
+		return len(self.coefficients)-1
+
+	def __neg__(self):
+		return Polynomial([-c for c in self.coefficients])
+
+	def __add__(self, other):
+		result = []
+		zero = self._zero_()
+		for i in xrange(max(self.deg(), other.deg())+1):
+			coef = zero
+			if i <= self.deg():
+				coef = coef+self.coefficients[i]
+			if i <= other.deg():
+				coef = coef+other.coefficients[i]
+			result.append(coef)
+		return Polynomial(result)
+
+	def __sub__(self, other):
+		return self+(-other)
+
+	def __mul__(self, other):
+		results = []
+		for a in self.coefficients:
+			results.append([])
+			for b in other.coefficients:
+				results[-1].append(a*b)
+		result = results.pop(0)
+		zero = self._zero_()
+		for coresult in results:
+			result.append(zero)
+			for i in xrange(len(coresult)):
+				result[-i-1]+= coresult[-i-1]
+		return Polynomial(result)
+
+	def __pow__(self, i):
+		assert i>=1
+		result = copy.deepcopy(self)
+		for j in xrange(i-1):
+			result = result*self
+		return result
+
+	def __str__(self):
+		ret = ""
+		for i in xrange(self.deg()+1):
+			if i!=0:
+				ret+="+"
+			ret += "(%s)x^%d"%(str(self.coefficients[i]),i)
+		return ret
+
+	def __divmod__(self, other):
+		remainder = copy.deepcopy(self)	
+		zero = self._zero_()
+		p_zero = Polynomial([zero])
+		one = other.coefficients[-1]/other.coefficients[-1]
+		if other==Polynomial([one]):
+			return (self, Polynomial([zero]))
+		x = Polynomial([zero, one])
+		quotient = Polynomial([zero])
+		while remainder != p_zero and remainder.deg()>=other.deg():
+			r_lead = remainder.coefficients[-1]
+			o_lead = other.coefficients[-1]
+			q_part = Polynomial([r_lead/o_lead])
+			q_deg = remainder.deg()-other.deg()
+			if q_deg > 0:
+				q_part*= x**q_deg
+			r_sub = other*q_part
+			remainder-=r_sub
+			quotient+=q_part
+		return (quotient, remainder)
+
+	def __mod__(self, other):
+		return divmod(self, other)[1]
+
+	def __eq__(self, other):
+		if self.deg() != other.deg():
+			return False
+		for s_c, o_c in zip(self.coefficients, other.coefficients):
+			if s_c != o_c:
+				return False
+		return True
+
+	def __ne__(self, other):
+		return not self==other
+
+	def __div__(self, other):
+		div, mod = divmod(self, other)
+		assert mod == Polynomial([self._zero_()])
+		return div
+
+	def __floordiv__(self, other):
+		return divmod(self, other)[0]
+
+	def __repr__(self):
+		return str(self)
+
 class Matrix:
 	def __init__(self, rows=1, cols=1, data=[], fill=None):
 		self.rows = rows
@@ -151,8 +423,10 @@ class Matrix:
 	
 	def to_Zmod(self, base):
 		if base == 2:
-			return Matrix(self.rows, self.cols, fill=lambda r,c:Bit(self.get(r,c)%2))
-		return Matrix(self.rows, self.cols, fill=lambda r,c:FFE(self.get(r,c)%base,base))
+			return Matrix(self.rows, self.cols, 
+				fill=lambda r,c:Bit(self.get(r,c)%2))
+		return Matrix(self.rows, self.cols, 
+			fill=lambda r,c:FFE(self.get(r,c)%base,base))
 
 	def join_with(self, other):
 		assert self.rows == other.rows
@@ -179,7 +453,8 @@ class Matrix:
 		assert self.cols == other.cols
 		newData = []
 		for r in xrange(self.rows):
-			row = [x+y for (x,y) in zip(self.get_row(r), other.get_row(r))]
+			row = [x+y for (x,y) in 
+				zip(self.get_row(r), other.get_row(r))]
 			newData.append(row)
 		return Matrix(data=newData)
 
@@ -188,7 +463,8 @@ class Matrix:
 		assert self.cols == other.cols
 		newData = []
 		for r in xrange(self.rows):
-			row = [x-y for (x,y) in zip(self.get_row(r), other.get_row(r))]
+			row = [x-y for (x,y) in 
+				zip(self.get_row(r), other.get_row(r))]
 			newData.append(row)
 		return Matrix(data=newData)
 	

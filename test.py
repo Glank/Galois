@@ -119,3 +119,9 @@ print "test results of a 40% error rate chanel:"
 rates = run_test(code, channel=TestChannel(.4))
 for rate in rates:
 	print "\t%s: %f"%(rate,rates[rate])
+
+raw_input()
+print "### Primes ###"
+for n in xrange(1,11):
+	print "The %d0,000th prime is: %d"%(n,get_prime(n*10000-1))
+
