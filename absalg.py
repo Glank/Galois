@@ -174,28 +174,30 @@ def is_field(elems, addition=addition, multiplication=multiplication):
 class FFE:
 	"""An element of a finite field."""
 	
-	def __init__(self, i, p):
+	def __init__(self, i, p, field=None, mulinv=None):
 		self.i = i
 		self.p = p
+		self.mulinv = mulinv
+		self.field = field
 
 	def __add__(self, other):
 		if isinstance(other,FFE):
 			assert self.p == other.p
-			return FFE((self.i+other.i)%self.p,self.p)
+			return FFE((self.i+other.i)%self.p,self.p,field=self.field)
 		else:
 			return other.__radd__(self)
 
 	def __sub__(self, other):
 		if isinstance(other,FFE):
 			assert self.p == other.p
-			return FFE((self.i-other.i)%self.p,self.p)
+			return FFE((self.i-other.i)%self.p,self.p,field=self.field)
 		else:
 			return other.__rsub__(self)
 
 	def __mul__(self, other):
 		if isinstance(other,FFE):
 			assert self.p == other.p
-			return FFE((self.i*other.i)%self.p,self.p)
+			return FFE((self.i*other.i)%self.p,self.p,field=self.field)
 		else:
 			return other.__rmul__(self)
 
@@ -207,6 +209,17 @@ class FFE:
 			return other.__rdiv__(self)
 
 	def mul_inv(self):
+		if self.mulinv is not None:
+			return self.mulinv
+		if self.field is not None and self.mulinv is None:
+			zero = self.i-self.i
+			one = self.p/self.p
+			for e in self.field:
+				if e!=zero and (e*self.i)%self.p==one:
+					self.mulinv = FFE(e,self.p,
+						field=self.field,mulinv=self
+					)
+			return self.mulinv
 		zero = self.i-self.i
 		assert self.i!=zero
 		one = self.i/self.i
@@ -215,14 +228,17 @@ class FFE:
 		x1 = one
 		x2 = zero
 		while u!=one:
-			q = v/u
+			print "u:",u
+			print "v:",v
+			q = v//u
 			r = v-q*u
 			x = x2-q*x1
 			v = u
 			u = r
 			x2 = x1
 			x1 = x
-		return FFE(x1%self.p,self.p)
+		self.mulinv = FFE(x1%self.p,self.p,mulinv=self)
+		return self.mulinv
 
 	def __pow__(self, other):
 		return FFE((self.i**int(other))%self.p,self.p)
@@ -599,3 +615,20 @@ class Zmod(list):
 					new_perms.append(perm+[new])
 			perms = new_perms
 		return perms
+
+class GF(list):
+	def __init__(self, n):
+		list.__init__(self)
+		self.n = n
+		factors = factor(n)
+		p = factors[0]
+		for f in factors:
+			assert f == p
+		if len(factors)==1:
+			Zmod.__init__(self, p)
+		else:
+			Zmodx = Zmod(p)**(len(factors))
+			Zmodx = [Polynomial(p) for p in Zmodx]
+			mod = Polynomial([1]*(len(factors)+1))
+			for p in Zmodx:
+				self.append(FFE(p,mod))
