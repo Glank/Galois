@@ -1,48 +1,50 @@
-CodingTheory
-============
+Galois
+======
 
-Coding Theory math utilities in python.
-It can help to do coding theory homework, but I wouldn't trust it for any real-world applications.
+Math utilities for Finite Fields and some Coding Theory applications in python.
 
-For examples of simple usage, please see <a href="https://github.com/Glank/CodingTheory/blob/master/test.py">test.py</a>.
-
-For examples of some real world usage (actual code I'm writing for my math class) see 
-<a href="https://github.com/Glank/CodingTheory/blob/master/HW.py">HW.py</a> who's output you can find
-<a href="https://github.com/Glank/CodingTheory/blob/master/homework_print.txt">here</a>.
+For examples of simple usage, please see <a href="https://github.com/Glank/Galois/blob/master/examples.py">examples.py</a>.
 
 There are many more advanced examples in the two example files than are shown below.
 
-Some impressive stuff (not really):
------------------------------------
+Jumping In - A Realistic Example:
+---------------------------------
 
-    print Zmod(2)**3
+So say you're working in GF(8) and you want to solve a system of equations, specifically:
 
-Prints the size 3 vector space of the finite field of two elements. (All binary words of length 3):
+    3x + 7y + 2z = 5
+    7x + 3y +  z = 5
+    5x + 6y + 4z = 1
 
-    [[Bit(0), Bit(0), Bit(0)], [Bit(0), Bit(0), Bit(1)], [Bit(0), Bit(1), Bit(0)], [Bit(0), Bit(1), Bit(1)], [Bit(1), Bit(0), Bit(0)], [Bit(1), Bit(0), Bit(1)], [Bit(1), Bit(1), Bit(0)], [Bit(1), Bit(1), Bit(1)]]
+Using Galois with Python, you can create two matricies to represent this equation in the form Ax=b:
 
-And,
+    from galois import GF
+    from coding import Matrix
+    A = Matrix(data=[
+            [3,7,2],
+            [7,3,1],
+            [5,6,4]
+        ]).to_GF(8)
+    b = Matrix(data=[[5,5,1]]).transpose().to_GF(8)
+    
+Then you can create an augmented matrix and sovle:
 
-    from random import choice
-    Z7 = Zmod(7)
-    A = Matrix(6,9,fill=lambda r, c:choice(Z7))
-    print A
+    aug = A.join_with(b)
+    solution = aug.get_reduced_echelon().submatrix(0,3,3,1)
+    print solution
 
+Where `.submatrix(0,3,3,1)` is the part of the row reduced augmented matrix that is
+`0` rows from the top, `3` colums from the left, and has a dimension of `3x1`.
+The program should print:
 
-Produces some random matrix in the integers mod 7:
-
-    6   3	2	6	5	0	3	5	6
-    4	3	3	5	1	5	0	3	5
-    6	1	4	3	3	5	0	1	1
-    0	6	3	1	5	1	3	6	2
-    1	4	3	2	1	4	6	1	3
-    5	2	4	1	4	5	5	5	6
-
+    GF(8)[7]
+    GF(8)[5]
+    GF(8)[3]
 
 And now some simple stuff:
 --------------------------
 
-You can create elements in a finite field like this,
+You can create elements in a simple prime-modulo finite field like this,
 
     a = FFE(8, 13)
     b = FFE(12, 13)
@@ -53,7 +55,7 @@ And then do simple operations with them:
     print a-b
     print a*b
     print b/a
-
+    
 prints:
 
     7
@@ -61,7 +63,16 @@ prints:
     5
     8
     
-You can also make matricies. By default they are in the real domain:
+Or you can create whole Galois fields like this:
+
+    gf25 = GF(25)
+    a = gf25[7]
+    b = gf25[13]
+
+Which would store the seventh and thirteenth elements of the 25-element finite field to the variables `a` and `b` respectively.
+    
+You can also make empty matricies if you import them from the `coding` module (included).
+By default they are in the real domain:
 
     A = Matrix(rows,cols)
 
@@ -70,7 +81,7 @@ Creates a simple, empty matrix. Getting and setting values is rather obvious:
     A.set(row,col,value)
     print A.get(row,col)
 
-These operators work with matricies as well (provided that they are of the right dimensions of course):
+These simple operators work with matricies as well (provided that they are of the right dimensions of course):
 
     C = A*B
     C = A+B
@@ -88,4 +99,17 @@ Move the matrix into the finite field of integers mod 11.
 
     A = A.to_Zmod(11)
 
-There's more to come.
+Or generally to any Galois field `p^n`
+
+    A = A.to_GF(27)
+
+You can create polynomials using any field elements as constants.
+
+    poly = Polynomial([9,2,6,2])
+    print poly
+
+prints:
+
+    (9)x^0+(2)x^1+(6)x^2+(2)x^3
+    
+You can also add, subtract, multiply, and divide polynomials.
