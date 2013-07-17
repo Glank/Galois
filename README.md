@@ -38,7 +38,7 @@ Then you can create an augmented matrix and sovle:
     print solution
 
 Where `.submatrix(0,3,3,1)` is the part of the row reduced augmented matrix that is
-`0` rows from the top, `3` colums from the left, and has a dimension of `3x1`.
+`0` rows from the top, `3` colums from the left, and is `3x1`.
 The program should print:
 
     GF(8)[7]
