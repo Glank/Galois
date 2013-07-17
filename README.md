@@ -1,12 +1,14 @@
 Galois
 ======
 
-Math utilities for finite fields and some coding theory applications in Python.
+Galois is a set of math utilities for finite fields and coding theory applications in Python.
 The tool is still in development but will be completed by the end of this summer.
-You need to download and learn to user Python before you can get much use out of this,
-but if you're good with Python you can download Galois <a href="https://github.com/Glank/Galois/archive/master.zip">here</a>.
+You'll need to <a href="http://www.python.org/download/">download</a> and learn to use 
+<a href="http://www.python.org/">Python</a> before you can get any use out of this program.
+Once you've got that, you can download Galois <a href="https://github.com/Glank/Galois/archive/master.zip">here</a>.
 
-For examples of simple usage, please see <a href="https://github.com/Glank/Galois/blob/master/examples.py">examples.py</a>.
+For examples of simple usage, please see 
+<a href="https://github.com/Glank/Galois/blob/master/examples.py">examples.py</a>.
 There are many more advanced examples in that file files than are shown below.
 
 Jumping In - A Realistic Example:
