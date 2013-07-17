@@ -9,7 +9,7 @@ Once you've got that, you can download Galois <a href="https://github.com/Glank/
 
 For examples of simple usage, please see 
 <a href="https://github.com/Glank/Galois/blob/master/examples.py">examples.py</a>.
-There are many more advanced examples in that file files than are shown below.
+There are many more advanced examples in that file than are shown below.
 
 Jumping In - A Realistic Example:
 ---------------------------------
