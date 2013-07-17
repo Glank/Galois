@@ -1,7 +1,7 @@
 Galois
 ======
 
-Math utilities for Finite Fields and some Coding Theory applications in python.
+Math utilities for finite fields and some coding theory applications in Python.
 
 For examples of simple usage, please see <a href="https://github.com/Glank/Galois/blob/master/examples.py">examples.py</a>.
 
