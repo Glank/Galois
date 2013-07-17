@@ -61,20 +61,9 @@ a = [
 a = Matrix(data=a).to_GF(8)
 x = Matrix(data=[[7,5,3]]).transpose().to_GF(8)
 b = a*x
-for i,e in enumerate(GF(8)):
-    print "%d) %r"%(i,e)
-print "#"*10
-print a
-print "#"*10
-print x
-print "#"*10
-print b
-print "#"*10
 
 aug = a.join_with(b)
 solve = aug.get_reduced_echelon().submatrix(0,3,3,1)
-
-print solve
 
 assert solve==x
 
