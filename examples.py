@@ -1,5 +1,5 @@
 from coding import *
-from absalg import *
+from galois import *
 from random import choice,randint
 
 print "### Finite Fields ###"
@@ -9,20 +9,15 @@ Z7 = Zmod(7)
 print Z7
 
 for z in Z7:
-	if z.i == 0:
-		continue
-	print "%s*%s"%(str(z),str(z.mul_inv()))
-	print z*z.mul_inv()
+    if z.i == 0:
+        continue
+    print "%s*%s"%(str(z),str(z.mul_inv()))
+    print z*z.mul_inv()
 
 print "(Z_2)^3:"
 Z2 = Zmod(2)
 print Z2**3
 
-print "1:"
-print Bit(1)
-
-print "not(1):"
-print ~Bit(1)
 
 raw_input()
 print "### Matricies ###"
@@ -60,10 +55,10 @@ print "### Linear Block Codes ###"
 
 #make base 10 data set
 data = [
-	[1,0,0,0,0,1,1],
-	[0,1,0,0,1,0,1],
-	[0,0,1,0,1,1,0],
-	[0,0,0,1,1,1,1]
+    [1,0,0,0,0,1,1],
+    [0,1,0,0,1,0,1],
+    [0,0,1,0,1,1,0],
+    [0,0,0,1,1,1,1]
 ]
 
 G = Matrix(data=data).to_Zmod(2)
@@ -91,7 +86,7 @@ print "c*H^T:"
 print c*(code.H.transpose())
 
 e = Matrix(data=[[0,0,0,0,0,0,0]]).to_Zmod(2)
-e.set(0,randint(0,6),Bit(1))
+e.set(0,randint(0,6),FFE(1,2))
 
 print "e:"
 print e
@@ -108,20 +103,20 @@ print code.decode(c.get_row(0))[0]
 print "test results of a 10% error rate chanel:"
 rates = run_test(code, channel=TestChannel(.1))
 for rate in rates:
-	print "\t%s: %f"%(rate,rates[rate])
+    print "\t%s: %f"%(rate,rates[rate])
 
 print "test results of a 25% error rate chanel:"
 rates = run_test(code, channel=TestChannel(.25))
 for rate in rates:
-	print "\t%s: %f"%(rate,rates[rate])
+    print "\t%s: %f"%(rate,rates[rate])
 
 print "test results of a 40% error rate chanel:"
 rates = run_test(code, channel=TestChannel(.4))
 for rate in rates:
-	print "\t%s: %f"%(rate,rates[rate])
+    print "\t%s: %f"%(rate,rates[rate])
 
 raw_input()
 print "### Primes ###"
 for n in xrange(1,11):
-	print "The %d0,000th prime is: %d"%(n,get_prime(n*10000-1))
+    print "The %d0,000th prime is: %d"%(n,get_prime(n*10000-1))
 
