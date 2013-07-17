@@ -4,8 +4,7 @@ Galois
 Math utilities for finite fields and some coding theory applications in Python.
 
 For examples of simple usage, please see <a href="https://github.com/Glank/Galois/blob/master/examples.py">examples.py</a>.
-
-There are many more advanced examples in the two example files than are shown below.
+There are many more advanced examples in that file files than are shown below.
 
 Jumping In - A Realistic Example:
 ---------------------------------
