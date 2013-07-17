@@ -80,7 +80,7 @@ By default they are in the real domain:
 
     A = Matrix(rows,cols)
 
-Creates a simple, empty matrix. Getting and setting values is rather obvious:
+Creates a simple, empty matrix. Getting and setting values is easy:
 
     A.set(row,col,value)
     print A.get(row,col)
