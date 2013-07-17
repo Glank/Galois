@@ -172,30 +172,31 @@ def is_field(elems, addition=addition, multiplication=multiplication):
 class FFE:
     """An element of a finite field."""
     
-    def __init__(self, i, p, field=None, mulinv=None):
+    def __init__(self, i, p, field=None, mulinv=None, parent=None):
         self.i = i
         self.p = p
         self.mulinv = mulinv
-        self.field = field
+        self.field = field #the field which contains i
+        self.parent = parent #such as GF(8)
 
     def __add__(self, other):
         if isinstance(other,FFE):
             assert self.p == other.p
-            return FFE((self.i+other.i)%self.p,self.p,field=self.field)
+            return FFE((self.i+other.i)%self.p,self.p,field=self.field,parent=self.parent)
         else:
             return other.__radd__(self)
 
     def __sub__(self, other):
         if isinstance(other,FFE):
             assert self.p == other.p
-            return FFE((self.i-other.i)%self.p,self.p,field=self.field)
+            return FFE((self.i-other.i)%self.p,self.p,field=self.field,parent=self.parent)
         else:
             return other.__rsub__(self)
 
     def __mul__(self, other):
         if isinstance(other,FFE):
             assert self.p == other.p
-            return FFE((self.i*other.i)%self.p,self.p,field=self.field)
+            return FFE((self.i*other.i)%self.p,self.p,field=self.field,parent=self.parent)
         else:
             return other.__rmul__(self)
 
@@ -215,7 +216,8 @@ class FFE:
             for e in self.field:
                 if e!=zero and (e*self.i)%self.p==one:
                     self.mulinv = FFE(e,self.p,
-                        field=self.field,mulinv=self
+                        field=self.field,mulinv=self,
+                        parent=self.parent
                     )
             return self.mulinv
         zero = self.i-self.i
@@ -233,14 +235,14 @@ class FFE:
             u = r
             x2 = x1
             x1 = x
-        self.mulinv = FFE(x1%self.p,self.p,mulinv=self)
+        self.mulinv = FFE(x1%self.p,self.p,mulinv=self,parent=self.parent)
         return self.mulinv
 
     def __pow__(self, other):
-        return FFE((self.i**int(other))%self.p,self.p)
+        return FFE((self.i**int(other))%self.p,self.p,field=self.field,parent=self.parent)
     
     def __neg__(self):
-        return FFE((self.p-self.i)%self.p,self.p)
+        return FFE((self.p-self.i)%self.p,self.p,field=self.field,parent=self.parent)
 
     def __eq__(self, other):
         assert self.p == other.p
@@ -251,6 +253,8 @@ class FFE:
         return self.i != other.i
 
     def __str__(self):
+        if self.parent is not None and isinstance(self.parent,GF):
+            return "GF(%d)[%d]"%(len(self.parent),self.parent.index(self))
         return "%s"%str(self.i)
 
     def __repr__(self):
@@ -440,5 +444,5 @@ class GF(Zmod):
                 i+=1
                 mod = Polynomial(list(reversed(to_base(i,p))))
                 assert mod.deg() == len(factors)
-            for p in Zmodx:
-                self.append(FFE(p,mod))
+            for i,p in enumerate(Zmodx):
+                self.append(FFE(p,mod,parent=self))
