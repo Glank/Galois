@@ -52,6 +52,51 @@ print -A
 raw_input()
 print "### Linear Block Codes ###"
 
+#make base 10 data set
+data = [
+    [1,0,0,1,2],
+    [0,1,1,2,3]
+]
+#make matrix in GF(4)
+G = Matrix(data=data).to_GF(4)
+
+print "G:"
+print G
+
+code = LinearBlockCode(G)
+
+print "H:"
+print code.H
+
+w = code.get_random_word()
+
+print "w:"
+print w
+print Matrix(data=[to_base(w,4)])
+
+c = Matrix(data=[code.encode([w])])
+
+print "c:"
+print c
+
+print "c*H^T:"
+print c*(code.H.transpose())
+
+e = [0,0,0,0,0]
+e[randint(0,4)]=randint(1,3)
+e = Matrix(data=[e]).to_GF(4)
+
+print "e:"
+print e
+
+print "c+e:"
+print c+e
+
+print "(c+e)*H^T"
+print (c+e)*(code.H.transpose())
+
+print "decode(c+e)"
+print code.decode(c.get_row(0))[0]
 
 #make base 10 data set
 data = [
@@ -60,7 +105,7 @@ data = [
     [0,0,1,0,1,1,0],
     [0,0,0,1,1,1,1]
 ]
-
+#make matrix in Zmod2
 G = Matrix(data=data).to_Zmod(2)
 
 print "G:"

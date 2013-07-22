@@ -225,26 +225,28 @@ class Code:
 
 class LinearBlockCode(Code):
     def __init__(self, G):
-        self.G = G
         G = G.get_reduced_echelon()
-        P = Matrix(G.rows, G.cols-G.rows,fill=lambda r,c:G.get(r,c+G.rows))
-        I = Matrix.get_identity(P.cols).to_Zmod(G.get(0,0).p)
+        self.G = G
+        P = Matrix(G.rows, G.cols-G.rows,
+            fill=lambda r,c:G.get(r,c+G.rows)
+        )
+        self.base = len(G.get(0,0).belongs_to())
+        I = Matrix.get_identity(P.cols).to_GF(self.base)
         self.H = (-(P.transpose())).join_with(I)    
-        self.base = G.get(0,0).p
         self.words = self.base**G.rows
         Code.__init__(self,1)
         self.code_list = [self.encode([w]) for w in xrange(self.words)]
 
     def encode(self, words):
         bits = []
+        zero = self.G.get(0,0)
+        zero = zero-zero
         for word in words:
             w = to_base(word, self.base)
-            w = [FFE(0,self.base) for i in xrange(self.G.rows-len(w))]+w
+            w = [zero for i in xrange(self.G.rows-len(w))]+w
             w = Matrix(data=[w])
             c = w*self.G
             bits = bits+c.get_row(0)
-        if self.base == 2:
-            bits = [FFE(i.i,2) for i in bits]
         return bits
 
     def get_word_matrix(self, w):

@@ -5,14 +5,15 @@ import copy
 def to_base(number, base):
     assert number>=0
     assert base>1
+    field = GF(base)
     ret = []
     i = 0
     while number > 0:
         digit = number%base
-        ret = [FFE(digit, base)]+ret
+        ret = [field[digit]]+ret
         number/=base
     if len(ret) == 0:
-        ret = [FFE(0, base)]
+        ret = [field[0]]
     return ret
 
 _primes = [2,3]
@@ -45,11 +46,39 @@ def factor(n):
             n/=get_prime(i)
         i+=1
     return factors
+def phi(n):
+    factors = set(factor(n))
+    prod = n
+    for f in factors:
+        prod = prod-prod/f
+    return prod
 
 def addition(a,b):
     return a+b
 def multiplication(a,b):
     return a*b
+def default_format(elem, field):
+    return str(field.index(elem))
+def str_format(elem, field):
+    return str(elem)
+def repr_format(elem, field):
+    return repr(elem)
+
+def get_latex_table(field, operation, formatting=default_format):
+    latex = "\\begin{tabular}{c|"+"c"*len(field)+"}\n"
+    latex+= "? & " + " & ".join([formatting(e,field) for e in field])
+    latex+= "\\\\\n\\hline\n"
+    rows = []
+    for a in field:
+        rows.append([])
+        for b in field:
+            rows[-1].append(operation(a,b))
+    rows = [[field[i]]+row for i,row in enumerate(rows)]
+    rows = [[formatting(e,field) for e in row] for row in rows]
+    rows = [" & ".join(row) for row in rows]
+    latex+= "\\\\\n".join(rows)
+    latex+= "\n\\end{tabular}"
+    return latex
 
 def is_group(elems, addition=addition):
     """A proof by contradiction that the set 'elems' is not a Group
@@ -179,6 +208,12 @@ class FFE:
         self.field = field #the field which contains i
         self.parent = parent #such as GF(8)
 
+    def belongs_to(self):
+        if self.parent is not None:
+            return self.parent
+        else:
+            return GF(self.p)
+
     def __add__(self, other):
         if isinstance(other,FFE):
             assert self.p == other.p
@@ -210,6 +245,13 @@ class FFE:
     def mul_inv(self):
         if self.mulinv is not None:
             return self.mulinv
+        if self.field is None and self.parent is not None:
+            one = FFE(self.p/self.p,self.p)
+            for e in self.parent:
+                if e*self==one:
+                    self.mulinv = e
+                    e.mulinv = self
+                    return e
         if self.field is not None and self.mulinv is None:
             zero = self.i-self.i
             one = self.p/self.p
@@ -238,8 +280,32 @@ class FFE:
         self.mulinv = FFE(x1%self.p,self.p,mulinv=self,parent=self.parent)
         return self.mulinv
 
-    def __pow__(self, other):
-        return FFE((self.i**int(other))%self.p,self.p,field=self.field,parent=self.parent)
+    def __pow__(self, i):
+        return self.__smart_pow__(i)[0]
+
+    def __smart_pow__(self, i, temp=None):
+        assert i>=1
+        if temp is None:
+            temp = {1:copy.deepcopy(self)}
+        if i in temp:
+           return temp[i], temp
+        else:
+            half = i//2
+            half_ = half+i%2
+            left, temp = self.__smart_pow__(half, temp=temp)
+            temp[half]=left
+            right, temp = self.__smart_pow__(half_, temp=temp) 
+            temp[half_]=right
+            return left*right, temp
+
+    def __ord__(self):
+        one = self/self
+        i = 1
+        result, temp = self.__smart_pow__(i)
+        while result != one:
+            i+=1
+            result, temp = self.__smart_pow__(i,temp)
+        return i
     
     def __neg__(self):
         return FFE((self.p-self.i)%self.p,self.p,field=self.field,parent=self.parent)
@@ -281,6 +347,13 @@ class FFE:
     def __hex__(self):
         return hex(self.i)
 
+backup_ord = ord
+def ord(obj):
+    if hasattr(obj, '__ord__'):
+        return obj.__ord__()
+    else:
+        return backup_ord(obj)
+
 class Polynomial:
     def __init__(self, coefficients):
         assert len(coefficients)>0
@@ -303,6 +376,24 @@ class Polynomial:
         field = GF(n)
         coefficients = self.coefficients
         return Polynomial([field[c] for c in coefficients])
+
+    def to_latex(self):
+        zero = self-self
+        if self==zero:
+            return "0"
+        coefs = [str(c) for c in self.coefficients]
+        latex = ""
+        for i,c in reversed(list(enumerate(coefs))):
+            if c!="0":
+                if latex:
+                    latex+="+"
+                if i==0:
+                    latex+=c
+                elif i==1:
+                    latex+=(c if c!="1" else "")+"x"
+                else:
+                    latex+=(c if c!="1" else "")+"x^{%d}"%i
+        return latex
 
     def deg(self):
         return len(self.coefficients)-1
@@ -340,11 +431,22 @@ class Polynomial:
         return Polynomial(result)
 
     def __pow__(self, i):
+        return self.__smart_pow__(i)[0]
+
+    def __smart_pow__(self, i, temp=None):
         assert i>=1
-        result = copy.deepcopy(self)
-        for j in xrange(i-1):
-            result = result*self
-        return result
+        if temp is None:
+            temp = {1:copy.deepcopy(self)}
+        if i in temp:
+           return temp[i], temp
+        else:
+            half = i//2
+            half_ = half+i%2
+            left, temp = self.__smart_pow__(half, temp=temp)
+            temp[half]=left
+            right, temp = self.__smart_pow__(half_, temp=temp) 
+            temp[half_]=right
+            return left*right, temp
 
     def __str__(self):
         ret = ""
@@ -400,7 +502,6 @@ class Polynomial:
     def __repr__(self):
         return str(self)
 
-
 class Zmod(list):
     def __init__(self, p):
         list.__init__(self)
@@ -419,6 +520,13 @@ class Zmod(list):
             perms = new_perms
         return perms
 
+def is_reducable(poly, divisors):
+    zero = poly-poly
+    for m in divisors:
+        if m.deg()>0 and poly%m==zero:
+            return True,m
+    return False
+
 class GF(Zmod):
     def __init__(self, n):
         list.__init__(self)
@@ -431,16 +539,10 @@ class GF(Zmod):
             Zmod.__init__(self, p)
         else:
             Zmodx = Zmod(p)**(len(factors))
-            Zmodx = [Polynomial(x) for x in Zmodx]
-            def is_reducable(poly):
-                zero = poly-poly
-                for m in Zmodx:
-                    if m.deg()>0 and poly%m==zero:
-                        return True,m
-                return False
+            Zmodx = [Polynomial(list(reversed(x))) for x in Zmodx]
             i = p**len(factors)
             mod = Polynomial(list(reversed(to_base(i, p))))
-            while is_reducable(mod):
+            while is_reducable(mod, Zmodx):
                 i+=1
                 mod = Polynomial(list(reversed(to_base(i,p))))
                 assert mod.deg() == len(factors)
