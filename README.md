@@ -3,9 +3,7 @@ Galois
 
 Galois is a set of math utilities for finite fields and coding theory applications in Python.
 The tool is still in development but will be completed by the end of this summer.
-You'll need to <a href="http://www.python.org/download/">download</a> and learn to use 
-<a href="http://www.python.org/">Python</a> before you can get any use out of this program.
-Once you've got that, you can download Galois <a href="https://github.com/Glank/Galois/archive/master.zip">here</a>.
+This implementation is built for python v2.
 
 For examples of simple usage, please see 
 <a href="https://github.com/Glank/Galois/blob/master/examples.py">examples.py</a>.
